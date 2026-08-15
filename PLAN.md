@@ -14,11 +14,17 @@ Work must proceed one tested phase at a time. A later phase may start only after
 
 ## Phase 1 - MC-38 sensor
 
-Phase 0 passed on 2026-08-15. Next, test raw GPIO27 input; add debounce only after raw input succeeds.
+- [x] Add raw GPIO27 input firmware using `INPUT_PULLUP`.
+- [x] Connect the MC-38 between GPIO27 and GND with USB power disconnected.
+- [x] Confirm magnet near produces `RAW=0`.
+- [x] Confirm magnet away produces `RAW=1`.
+- [x] Add 50 ms debounce after the raw input test passes.
+- [x] Pass the debounced open/closed transition test per user confirmation.
+- [ ] Secure the temporary physical wiring before the full-device test.
 
 ## Phase 2 - DFPlayer and speaker
 
-Blocked until Phase 1 physically passes. Test audio independently from the door sensor.
+Phase 1 sensor behavior passed on 2026-08-15. Prepare and test audio independently from the door sensor.
 
 ## Phase 3 - Door/audio integration
 
