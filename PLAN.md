@@ -26,9 +26,19 @@ Work must proceed one tested phase at a time. A later phase may start only after
 
 Phase 1 sensor behavior passed on 2026-08-15. Prepare and test audio independently from the door sensor.
 
+- [x] User reports the FAT32 microSD and `mp3/0001.mp3` are prepared and inserted.
+- [x] User reports DFPlayer power and crossed UART are connected.
+- [x] Connect the speaker and confirm first audible playback (2026-10-09).
+- [ ] Visually inspect all connections before applying power.
+- [x] Add standalone HardwareSerial communication-test firmware.
+- [x] Confirm DFPlayer initialization on current port COM8 (2026-10-09).
+- [ ] Resolve the file-count query warning; later feedback reported value 1.
+- [x] Confirm at least five clear playbacks without unexpected resets or distortion (user report, 2026-10-09).
+- [ ] Verify adjustable volume during the standalone audio test.
+
 ## Phase 3 - Door/audio integration
 
-Blocked until both sensor and audio subsystems pass independently.
+Sensor and repeated audible playback passed independently. User requested integration on 2026-10-09; the file-count warning and separate volume-adjustment check remain follow-ups.
 
 ## Phase 4 - V1 documentation and final physical validation
 

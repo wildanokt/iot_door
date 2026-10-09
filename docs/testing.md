@@ -37,3 +37,37 @@ Do not add software debounce until the raw readings pass.
 | Repeat transitions | One stable event per transition, with no false triggers | Passed per user confirmation on 2026-08-15 |
 
 Known hardware follow-up: secure the temporary MC-38 wiring before the full-device acceptance test.
+
+## Phase 2A-B: DFPlayer preparation and wiring
+
+| Test | Expected result | Actual result |
+| --- | --- | --- |
+| microSD preparation | FAT32 card contains `mp3/0001.mp3` | Pending user preparation |
+| Power wiring | ESP32 VIN/5V to VCC and common GND | Pending user wiring |
+| UART wiring | GPIO17 through about 1k ohm to DFPlayer RX; DFPlayer TX to GPIO16 | Pending user wiring |
+| Speaker wiring | Speaker is connected only across SPK1 and SPK2 | Pending user wiring |
+| Visual inspection | No shorts, reversed power, or speaker-to-GND connection | Pending user inspection |
+
+## Phase 2C: communication test without speaker
+
+| Test | Expected result | Actual result |
+| --- | --- | --- |
+| Firmware build and upload | PlatformIO succeeds on COM10 | Pending local test |
+| DFPlayer initialization | Module responds over UART | Pending local test |
+| microSD query | Module returns a non-negative file count | Pending local test |
+| Track command | Command for `mp3/0001.mp3` is issued | Pending local test |
+| Audible playback | Clear audio from speaker | Intentionally not tested; speaker disconnected |
+
+## 2026-10-09: rewiring and first audible playback
+
+- Current USB interface: Silicon Labs CP210x on COM8.
+- After wiring corrections, user-provided Serial output shows normal ESP32 boot and `DFPlayer initialized`.
+- Track command for `mp3/0001.mp3` was sent at volume 12.
+- The synchronous microSD file-count query still reports a warning. Later feedback type 11 reports value 1; this likely represents a delayed file-count reply, but the log does not include its command identifier.
+- User confirms audio is now audible through the connected speaker. Clarity and repeated playback stability remain to be confirmed.
+- Pending Phase 2 acceptance: at least five successful, understandable playbacks without unexpected ESP32 resets or distortion, and adjustable volume.
+- No Phase 3 integration acceptance has been performed.
+
+### Repeated standalone playback accepted
+
+On 2026-10-09, the user confirms all five complete playbacks passed the requested clarity and stability check and asks to proceed to the door trigger. Record this as the repeated-playback milestone. The synchronous file-count warning and a separate volume-adjustment test remain follow-ups; neither has been marked passed.

@@ -24,3 +24,24 @@ The MC-38 is only a switch in this test, so its two wires do not have positive a
 If the ESP32 is mounted across the breadboard center gap, place each jumper in a hole that shares a connected row with the intended ESP32 pin. Do not place both MC-38 connections in the same connected group of breadboard holes.
 
 The DFPlayer Mini and speaker must remain disconnected during this test.
+
+## Phase 2 DFPlayer and speaker
+
+Disconnect the USB cable before making or changing any of these connections:
+
+```text
+ESP32 VIN/5V -> DFPlayer VCC
+ESP32 GND -> DFPlayer GND
+
+ESP32 GPIO17/TX -> approximately 1k ohm resistor -> DFPlayer RX
+DFPlayer TX -> ESP32 GPIO16/RX
+
+DFPlayer SPK1 -> speaker terminal 1
+DFPlayer SPK2 -> speaker terminal 2
+```
+
+ESP32 and DFPlayer must share GND. UART is crossed: ESP32 TX goes to DFPlayer RX, and DFPlayer TX goes to ESP32 RX.
+
+Never connect either speaker terminal to an ESP32 pin or GND. The speaker must be connected only across DFPlayer `SPK1` and `SPK2`.
+
+Use the ESP32 pin marked `VIN` or `5V` for DFPlayer power, not `3V3`. Insert the prepared microSD card before applying power.
