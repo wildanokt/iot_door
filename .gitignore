@@ -1,3 +1,4 @@
 /firmware/.pio/
+/firmware/.pio-core/
 /firmware/.vscode/
 *.log

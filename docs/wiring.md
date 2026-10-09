@@ -45,3 +45,11 @@ ESP32 and DFPlayer must share GND. UART is crossed: ESP32 TX goes to DFPlayer RX
 Never connect either speaker terminal to an ESP32 pin or GND. The speaker must be connected only across DFPlayer `SPK1` and `SPK2`.
 
 Use the ESP32 pin marked `VIN` or `5V` for DFPlayer power, not `3V3`. Insert the prepared microSD card before applying power.
+
+## Phase 3 door trigger
+
+Retain the working DFPlayer and speaker connections. With USB disconnected, connect the MC-38 between the ESP32 pin labeled `P27`/`27` and a pin labeled `GND`. Do not use breadboard row numbers as GPIO numbers.
+
+On the user's photographed 38-pin board, viewed face-up with USB at the top, GPIO27 is the ninth metal header pin down on the right. Confirm its printed `P27` label before connecting. GND can be shared with the existing DFPlayer ground through correctly connected breadboard holes.
+
+Place the magnet near the wired sensor for CLOSED (LOW), and move it away for OPEN (HIGH). Neither MC-38 wire goes to 3V3 or 5V.

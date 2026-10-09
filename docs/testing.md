@@ -71,3 +71,30 @@ Known hardware follow-up: secure the temporary MC-38 wiring before the full-devi
 ### Repeated standalone playback accepted
 
 On 2026-10-09, the user confirms all five complete playbacks passed the requested clarity and stability check and asks to proceed to the door trigger. Record this as the repeated-playback milestone. The synchronous file-count warning and a separate volume-adjustment test remain follow-ups; neither has been marked passed.
+
+## Phase 3: integrated door trigger
+
+| Test | Expected result | Actual result |
+| --- | --- | --- |
+| Firmware build | ESP32 integrated firmware builds | Passed on 2026-10-09; RAM 21,592 bytes, flash 273,241 bytes |
+| Firmware upload | Integrated firmware uploads to COM8 | Passed on 2026-10-09; all flash hashes verified and ESP32 reset normally |
+| Boot CLOSED | Initial state CLOSED, System ready, no playback | Pending physical test |
+| Boot OPEN | Initial state OPEN, no playback until a future close/open cycle | Pending physical test |
+| Normal opening | One Door OPEN event and one track-1 playback command | Pending physical test |
+| Hold OPEN for 15 seconds | No further opening event or playback | Pending physical test |
+| Close and re-open | Closing is silent and re-arms; opening plays once after cooldown | Pending physical test |
+| Ten opening cycles | One playback per valid opening, no missed or duplicate triggers | Pending physical test |
+| Slow and fast magnet movement | Stable debounce; suppressed short openings/cooldown reported predictably | Pending physical test |
+| USB power cycle | Returns to System ready with no startup playback | Pending physical test |
+
+Volume is raised from the tested 12 to 16 on user request (approximately 30 percent more in the numerical setting, not a guaranteed acoustic percentage). Audio clarity and power stability at 16 remain to be checked physically. The integration no longer sends the standalone file-count query or automatically starts a track during setup. Audio commands use no ACK wait after the initialization handshake so sensor servicing does not wait for playback completion. A rapid re-opening after cooldown may restart a currently playing track.
+
+The restricted session cannot create locks in the global PlatformIO installation. Build succeeded using a copy of its installed platform and packages in the git-ignored `firmware/.pio-core` directory, with `PLATFORMIO_CORE_DIR` set to that directory. Source dependencies and board configuration are unchanged.
+
+### Integrated startup capture
+
+On 2026-10-09, a 20-second COM8 capture at 115200 baud shows `DFPlayer initialized`, `Volume command: 16`, `Stop command sent`, `Initial door state: OPEN`, and `System ready`. No playback command, repeated reset, or flash-read error was observed. This verifies startup diagnostics and the initial OPEN state handling, but does not verify physical MC-38 wiring, audible silence, or a closed/open cycle. Serial was closed after the capture so the user can open their monitor.
+
+After the user reports connecting the MC-38 and reconnecting USB, a fresh 60-second COM8 capture again shows initialization at volume 16, initial OPEN, and System ready. No subsequent door transitions, playback commands, or reboot messages were observed. Magnet movement during this capture has not been confirmed, so this does not establish a sensor fault or an integration pass. Serial was closed when capture completed.
+
+On 2026-10-09, the user subsequently confirms that the integrated door trigger works. This accepts the basic door-trigger milestone at volume 16; the full ten-cycle, slow/fast movement, both startup-state, and power-cycle checklist above remains pending unless separately confirmed.

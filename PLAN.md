@@ -40,6 +40,15 @@ Phase 1 sensor behavior passed on 2026-08-15. Prepare and test audio independent
 
 Sensor and repeated audible playback passed independently. User requested integration on 2026-10-09; the file-count warning and separate volume-adjustment check remain follow-ups.
 
+- [x] Combine the accepted sensor debounce and DFPlayer command.
+- [x] Seed a stable initial door state without startup playback.
+- [x] Play once on a debounced CLOSED-to-OPEN transition, then require closing to re-arm.
+- [x] Add a 1000 ms cooldown and keep servicing the sensor during playback.
+- [x] Build the integrated firmware at volume 16 (2026-10-09).
+- [x] Upload the integrated firmware to COM8 and capture System ready at volume 16 (2026-10-09).
+- [x] User confirms the basic integrated door trigger works (2026-10-09).
+- [ ] Verify closed/open startup, 15-second hold, re-arm, repeated cycles, and power cycling physically.
+
 ## Phase 4 - V1 documentation and final physical validation
 
 Blocked until integration passes.
