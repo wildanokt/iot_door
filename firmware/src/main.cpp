@@ -6,6 +6,7 @@ constexpr int DFPLAYER_RX_PIN = 16;
 constexpr int DFPLAYER_TX_PIN = 17;
 
 constexpr int AUDIO_TRACK = 1;
+constexpr uint16_t MAX_AUDIO_TRACK = 9999;
 constexpr int AUDIO_VOLUME = 16;
 constexpr unsigned long DOOR_DEBOUNCE_MS = 50;
 constexpr unsigned long TRIGGER_COOLDOWN_MS = 1000;
@@ -21,6 +22,8 @@ int previousRawDoorState = HIGH;
 int stableDoorState = HIGH;
 unsigned long lastRawChangeMs = 0;
 unsigned long lastTriggerMs = 0;
+uint16_t nextAudioTrack = AUDIO_TRACK;
+uint16_t lastRequestedTrack = 0;
 
 bool initDoorSensor() {
   previousRawDoorState = digitalRead(DOOR_SENSOR_PIN);
@@ -74,15 +77,58 @@ void setAudioVolume(uint8_t volume) {
 }
 
 void playTrack(uint16_t track) {
+  lastRequestedTrack = track;
   Serial.print("Playing track ");
   Serial.println(track);
-  audioPlayer.playMp3Folder(track);
+  // DFRobot's playMp3Folder command is 0x12. Request feedback (byte 4 = 1)
+  // so missing files can be reported, but send it without a blocking ACK wait.
+  // The existing library continues parsing the asynchronous replies in loop().
+  uint8_t command[] = {
+    0x7E, 0xFF, 0x06, 0x12, 0x01,
+    static_cast<uint8_t>(track >> 8), static_cast<uint8_t>(track & 0xFF),
+    0, 0, 0xEF
+  };
+  uint16_t sum = 0;
+  for (int i = 1; i < 7; i++) {
+    sum += command[i];
+  }
+  const uint16_t checksum = -sum;
+  command[7] = static_cast<uint8_t>(checksum >> 8);
+  command[8] = static_cast<uint8_t>(checksum & 0xFF);
+  dfPlayerSerial.write(command, sizeof(command));
   Serial.print("Play command sent for mp3/");
   if (track < 1000) Serial.print('0');
   if (track < 100) Serial.print('0');
   if (track < 10) Serial.print('0');
   Serial.print(track);
   Serial.println(".mp3");
+}
+
+void playNextTrack() {
+  const uint16_t track = nextAudioTrack;
+  nextAudioTrack = track < MAX_AUDIO_TRACK ? track + 1 : AUDIO_TRACK;
+  playTrack(track);
+}
+
+void handleMissingTrack() {
+  if (lastRequestedTrack == 0) {
+    // Startup errors must not cause automatic playback.
+    return;
+  }
+
+  if (lastRequestedTrack > AUDIO_TRACK) {
+    Serial.print("Track ");
+    Serial.print(lastRequestedTrack);
+    Serial.println(" not found; restarting sequence at track 1");
+    nextAudioTrack = AUDIO_TRACK + 1;
+    lastTriggerMs = millis();
+    playTrack(AUDIO_TRACK);
+  } else {
+    // If the fallback also fails, do not create an endless retry loop.
+    nextAudioTrack = AUDIO_TRACK;
+    lastRequestedTrack = 0;
+    Serial.println("ERROR: mp3/0001.mp3 unavailable; no further automatic retry");
+  }
 }
 
 void stopAudio() {
@@ -114,6 +160,9 @@ void printAudioEvent(uint8_t type, int value) {
     case DFPlayerError:
       Serial.print("DFPlayer event: error code ");
       Serial.println(value);
+      if (value == FileIndexOut || value == FileMismatch) {
+        handleMissingTrack();
+      }
       break;
     default:
       Serial.print("DFPlayer event type ");
@@ -141,6 +190,7 @@ void setup() {
 
   doorReady = initDoorSensor();
   if (audioReady && doorReady) {
+    Serial.println("Track sequence: starts at 1; missing track restarts at 1");
     Serial.println("System ready");
   } else {
     Serial.println("System NOT ready; see errors above");
@@ -148,6 +198,13 @@ void setup() {
 }
 
 void loop() {
+  // Handle replies to the previous command before selecting another track.
+  if (audioReady && audioPlayer.available()) {
+    const uint8_t type = audioPlayer.readType();
+    const int value = audioPlayer.read();
+    printAudioEvent(type, value);
+  }
+
   if (doorReady) {
     const int rawState = digitalRead(DOOR_SENSOR_PIN);
     const unsigned long now = millis();
@@ -178,16 +235,11 @@ void loop() {
           } else {
             lastTriggerMs = now;
             hasPlayed = true;
-            playTrack(AUDIO_TRACK);
+            playNextTrack();
           }
         }
       }
     }
   }
 
-  if (audioReady && audioPlayer.available()) {
-    const uint8_t type = audioPlayer.readType();
-    const int value = audioPlayer.read();
-    printAudioEvent(type, value);
-  }
 }

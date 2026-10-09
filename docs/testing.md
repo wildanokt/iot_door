@@ -98,3 +98,23 @@ On 2026-10-09, a 20-second COM8 capture at 115200 baud shows `DFPlayer initializ
 After the user reports connecting the MC-38 and reconnecting USB, a fresh 60-second COM8 capture again shows initialization at volume 16, initial OPEN, and System ready. No subsequent door transitions, playback commands, or reboot messages were observed. Magnet movement during this capture has not been confirmed, so this does not establish a sensor fault or an integration pass. Serial was closed when capture completed.
 
 On 2026-10-09, the user subsequently confirms that the integrated door trigger works. This accepts the basic door-trigger milestone at volume 16; the full ten-cycle, slow/fast movement, both startup-state, and power-cycle checklist above remains pending unless separately confirmed.
+
+## Sequential MP3 extension (2026-10-09)
+
+| Test | Expected result | Actual result |
+| --- | --- | --- |
+| Firmware build | ESP32 firmware builds with sequential tracks and bounded fallback | Passed on 2026-10-09; flash 273,781 bytes |
+| Upload/startup | Upload succeeds; System ready and sequence start at 1 are logged | Passed on COM8; flash hashes verified, startup OPEN at volume 16, no startup playback command |
+| Consecutive files | Eligible openings request 1, 2, 3 in order | Requests 1 then 2 captured; audible multiple-file sequence still pending because track 2 is absent |
+| Missing next number | Error 5 or 6 causes one fallback command for track 1; next opening requests 2 | Passed on the connected module: four track-2 errors (code 6), each followed by one track-1 command |
+| Missing track 1 | Error logged with no repeated automatic playback commands | Pending physical test |
+| Held-open/cooldown | No extra command or sequence advancement without an eligible opening | Held-open behavior passed in capture; sub-1000 ms opening remains untested |
+| Reset while open/closed | No startup playback and sequence restarts at 1 | Pending physical test |
+
+Wraparound uses module error responses, not the unreliable standalone file-count query. If a compatible clone stays silent on a missing file, missing-track fallback has not passed and needs further diagnosis. No new sensor wiring is required.
+
+### Sequential firmware Serial evidence
+
+After upload on 2026-10-09, the first capture shows a CLOSED transition at 7.99 seconds, an OPEN transition requesting track 1 at 10.61 seconds, and a playback-finished response at 25.00 seconds. There is no duplicate playback command through the end of that 60-second capture.
+
+A second 45-second capture continues without resetting the sequence. At 17.39 seconds an opening requests track 2; at 17.47 seconds the module returns error 6, and at 17.48 seconds the firmware sends exactly one fallback command for track 1. Later close/open cycles repeat that same behavior at 26.03, 28.52, and 32.62 seconds. This validates feedback-requested play packets, real missing-file responses, wraparound, and re-arming on this module. No repeated boot messages were observed. Acoustic quality and multiple distinct tracks still require the user's listening test. Serial was closed after capture.

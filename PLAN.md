@@ -52,3 +52,16 @@ Sensor and repeated audible playback passed independently. User requested integr
 ## Phase 4 - V1 documentation and final physical validation
 
 Blocked until integration passes.
+
+## User-requested sequential tracks (2026-10-09)
+
+- [x] Advance the numbered MP3 on each eligible opening.
+- [x] On missing-file errors 5/6, restart at track 1 with one fallback attempt.
+- [x] Avoid automatic retry loops when track 1 is also missing.
+- [x] Preserve startup silence, debounce, re-arm, cooldown, and volume 16.
+- [x] Build the sequential firmware (2026-10-09).
+- [x] Upload to COM8 and verify startup diagnostics (2026-10-09).
+- [x] Capture an opening requesting track 1 and a playback-finished reply.
+- [x] Capture repeated track-2 missing-file errors, each with one fallback to track 1, without held-open retrigger.
+- [ ] Verify audible 1/2/3 cycling after multiple numbered files are added.
+- [ ] Physically verify the missing-track-1 stop condition if needed.
