@@ -20,7 +20,7 @@ Build from PowerShell:
 
 ```powershell
 cd firmware
-C:\Users\Zaghi\.platformio\penv\Scripts\platformio.exe run
+& "$env:USERPROFILE\.platformio\penv\Scripts\platformio.exe" run
 ```
 
 Do not set an upload port until Windows has detected the board and the actual COM number is known.
